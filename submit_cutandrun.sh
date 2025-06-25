@@ -9,8 +9,6 @@
 #$ -l scratch=10G
 #$ -l h_rt=72:00:00
 
-########## USERS
-
 ########## DEFINE ARGUMENTS ##########
 
 # file = full path to the required _samples.txt file with sample information. This file should be in same directory as FASTQs.
@@ -34,6 +32,7 @@ echo >&2 "Base directory: ${tmp}"
 echo >&2 "LOG Directory: ${LOG_FILE}"
 echo >&2 "Script directory: ${PROJECT_ROOT}"
 echo >&2 "Submitting modules"
+echo >&2 "Conda environment being sourced: ${CONDA_ENV}"
 
 
 ################## FASTQC #######################

@@ -13,9 +13,8 @@
 
 ######### LOAD ENVIRONMENT AND MODULES ########
 
-source /wynton/home/reiter/lb13/miniconda3/bin/activate CutRun
-
-module load CBI bowtie2/2.4.2 samtools/1.10
+module load CBI bowtie2/2.4.2 samtools/1.10 miniforge3
+conda activate CUTRUN_test
 
 ######## DEFINE ARGUMENTS #########
 
