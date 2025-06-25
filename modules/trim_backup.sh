@@ -28,7 +28,7 @@ LOG_DIR=$7
 
 ######## SET UP LOG FILE #########
 # Redirect both stdout and stderr to the log file
-LOG_FILE="${LOG_DIR}/trim_${JOB_ID}.log"
+LOG_FILE="${LOG_DIR}/trim_${project}_${sample}_${JOB_ID}.log"
 exec > "$LOG_FILE" 2>&1
 
 ######## SET UP $TMPDIR DIRECTORY FOR SPEED #########
@@ -76,7 +76,7 @@ echo >&2 "K-seq trimming complete"
 
 echo >&2 "Copying files"
 
-cp $trimdir/"$sample"_1.paired.fastq.gz $destdir/
-cp $trimdir/"$sample"_2.paired.fastq.gz $destdir/
-cp $trimdir/"$sample"_1_kseq_paired.fastq.gz $destdir/trimmomatic/
-cp $trimdir/"$sample"_2_kseq_paired.fastq.gz $destdir/trimmomatic/
+cp $trimdir/"$sample"_1.paired.fastq.gz $destdir
+cp $trimdir/"$sample"_2.paired.fastq.gz $destdir
+cp $trimdir/"$sample"_1_kseq_paired.fastq.gz $destdir
+cp $trimdir/"$sample"_2_kseq_paired.fastq.gz $destdir
