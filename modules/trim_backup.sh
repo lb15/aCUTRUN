@@ -14,7 +14,7 @@
 ######### LOAD ENVIRONMENT AND MODULES ########
 
 module load CBI bowtie2/2.4.2 samtools/1.10 miniforge3
-conda activate CUTRUN_test
+conda activate CUTRUN
 
 ######## DEFINE ARGUMENTS #########
 
