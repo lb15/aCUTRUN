@@ -9,6 +9,7 @@
 #$ -l scratch=10G
 #$ -l h_rt=72:00:00
 
+########## USERS
 
 ########## DEFINE ARGUMENTS ##########
 
@@ -37,10 +38,10 @@ echo >&2 "Submitting modules"
 
 ################## FASTQC #######################
 
-while IFS=, read project sample R1 R2 control;do
-        fastqc $workdir/$project/"$sample"_"$R1" $workdir/$project/"$sample"_"$R2"
+#while IFS=, read project sample R1 R2 control;do
+#        fastqc $workdir/$project/"$sample"_"$R1" $workdir/$project/"$sample"_"$R2"
 
-done < $file
+#done < $file
 
 
 ################# TRIMMING ############
