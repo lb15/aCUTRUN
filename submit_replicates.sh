@@ -115,10 +115,15 @@ while IFS=, read -r name sample control rest_of_line; do
 	###### REMOVE PROBLEMATIC REGIONS ###############
 	qsub -N "problem_dup_hom_${name}_${sample}_${control}" \
 		-hold_jid "${name}_${sample}_${control}_multiinter_dupmark" \
-		$script_dir/problemregions_subtract.sh "${outputfile_dup}_replicates_homID.bed"
+		$script_dir/problemregions_subtract.sh "${outputfile_dup}_replicates_homID.bed" \
+		$PROJECT_ROOT \
+		$LOG_DIR
+
 	qsub -N "problem_dedup_hom_${name}_${sample}_${control}" \
 		-hold_jid "${name}_${sample}_${control}_multiinter_dedup" \
-		$script_dir/problemregions_subtract.sh "${outputfile_dedup}_replicates_homID.bed"
+		$script_dir/problemregions_subtract.sh "${outputfile_dedup}_replicates_homID.bed" \
+		$PROJECT_ROOT \
+		$LOG_DIR
 
 	############## CHIPSEEKER AND HOMER ################
 
@@ -127,21 +132,40 @@ while IFS=, read -r name sample control rest_of_line; do
 	output_dedup="${outputfile_dedup}_replicates_homID_noprob.bed"
 
 	qsub -hold_jid "problem_dup_${name}_${sample}_${control}" \
-		"${PROJECT_ROOT}/modules/chpskr_general.sh" "${output_dup}"
+		"${PROJECT_ROOT}/modules/chpskr_general.sh" \
+		"${output_dup}" \
+		"${PROJECT_ROOT}" \
+		"${LOG_DIR}"
 
 	qsub -hold_jid "problem_dedup_${name}_${sample}_${control}" \
-		"${PROJECT_ROOT}/modules/chpskr_general.sh" "${output_dedup}"
+		"${PROJECT_ROOT}/modules/chpskr_general.sh" \
+		"${output_dedup}" \
+		"${PROJECT_ROOT}" \
+                "${LOG_DIR}"
 
 	qsub -hold_jid "problem_dup_hom_${name}_${sample}_${control}" \
-		"${PROJECT_ROOT}/modules/homer.sh" "${output_dup}" mm10 50
+		"${PROJECT_ROOT}/modules/homer.sh" \
+		"${output_dup}" mm10 50 
+		"${PROJECT_ROOT}" \
+		"${LOG_DIR}"
 
 	qsub -hold_jid "problem_dup_hom_${name}_${sample}_${control}" \
-		"${PROJECT_ROOT}/modules/homer_annotatepeaks.sh" "${output_dup}" mm10 homeranno
+		"${PROJECT_ROOT}/modules/homer_annotatepeaks.sh" \
+		"${output_dup}" mm10 homeranno \
+		"${PROJECT_ROOT}" \
+		"${LOG_DIR}"
 
 	qsub -hold_jid "problem_dedup_hom_${name}_${sample}_${control}" \
-		"${PROJECT_ROOT}/modules/homer.sh" "${output_dedup}" mm10 50
+		"${PROJECT_ROOT}/modules/homer.sh" \
+		"${output_dedup}" mm10 50 \
+		"${PROJECT_ROOT}" \
+		"${LOG_DIR}"
+	
 	qsub -hold_jid "problem_dedup_hom_${name}_${sample}_${control}" \
-		"${PROJECT_ROOT}/modules/homer_annotatepeaks.sh" "${output_dedup}" mm10 homeranno
+		"${PROJECT_ROOT}/modules/homer_annotatepeaks.sh" \
+		"${output_dedup}" mm10 homeranno \
+		"${PROJECT_ROOT}" \
+		"${LOG_DIR}"
 
 	echo >&2 "Finished"
 done < $file
@@ -151,7 +175,7 @@ echo >&2 "Making consensus peak list for entire project"
 
 qsub -N "consensus_${name}" \
 	-hold_jid "*_multiinter_*" \
-	"${script_dir}/consensus_peaks_nogreylist.sh" $file $workdir
+	"${script_dir}/consensus_peaks_nogreylist.sh" $file $workdir $PROJECT_ROOT $LOG_DIR
 
 ##################### MAKE AVERAGE BIGWIGS #########################
 echo >&2 "Averaging bigwigs"
@@ -221,20 +245,23 @@ while IFS=, read -r name sample control rest_of_line; do
 
 	qsub $script_dir/bigwigAverage_auto.sh \
 		"${dir_s_dup}/${sample}_dupmark_bigwig_list.txt" \
-		"${dir_s_dup}/${name}_${sample}_dupmark_avg_120bp_RPGC.bw"
+		"${dir_s_dup}/${name}_${sample}_dupmark_avg_120bp_RPGC.bw" \
+		"${LOG_DIR}"
 
 	qsub $script_dir/bigwigAverage_auto.sh \
 		"${dir_s_dedup}/${sample}_dedup_bigwig_list.txt" \
-		"${dir_s_dedup}/${name}_${sample}_dedup_avg_120bp_RPGC.bw"
+		"${dir_s_dedup}/${name}_${sample}_dedup_avg_120bp_RPGC.bw" \
+		"${LOG_DIR}"
 
 	qsub $script_dir/bigwigAverage_auto.sh \
 		"${dir_c_dup}/${control}_dupmark_bigwig_list.txt" \
-		"${dir_c_dup}/${name}_${control}_dupmark_avg_120bp_RPGC.bw"
+		"${dir_c_dup}/${name}_${control}_dupmark_avg_120bp_RPGC.bw" \
+		"${LOG_DIR}"
 
 	qsub $script_dir/bigwigAverage_auto.sh \
 		"${dir_c_dedup}/${control}_dedup_bigwig_list.txt" \
-		"${dir_c_dedup}/${name}_${control}_dedup_avg_120bp_RPGC.bw"
-	
+		"${dir_c_dedup}/${name}_${control}_dedup_avg_120bp_RPGC.bw" \
+		"${LOG_DIR}"
 done < $file
 
 

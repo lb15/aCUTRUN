@@ -35,6 +35,6 @@ echo >&2 "Submitting modules"
 
 ################ BAMTOBIGWIG #################
 while IFS=, read project sample R1 R2 control;do
-	qsub -hold_jid align_"$project"_"$sample" -N bamtobigwig_"$project"_"$sample" $script_dir/bamtobigwig_RPGC.sh $project $sample $tmp $PROJECT_ROOT $LOG_DIR
+	qsub -hold_jid align_"$project"_"$sample" -N bamtobigwig_"$project"_"$sample" $script_dir/bamtobigwig_RPGC.sh $project $sample $workdir $PROJECT_ROOT $LOG_DIR
 done < $file
 
