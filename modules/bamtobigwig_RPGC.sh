@@ -8,10 +8,10 @@
 #$ -l mem_free=10G
 #$ -l scratch=10G
 #$ -l h_rt=72:00:00
-#$ -m ea                           #--email when done
 
 ############# LOAD ENVIRONMENT ####################
-
+module load CBI miniforge3
+conda activate CUTRUN
 
 ############## DEFINE ARGUMENTS ####################
 

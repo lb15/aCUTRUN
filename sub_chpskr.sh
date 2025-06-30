@@ -20,9 +20,9 @@ PROJECT_ROOT="$SGE_O_WORKDIR"
 script_dir="${PROJECT_ROOT}/modules/"
 
 ## LOG directory
-LOG_DIR=$workdir/log_reiter_cutandrun
+LOG_DIR="${workdir}/log_${JOB_ID}_cutandrun"
 mkdir -p "$LOG_DIR"
-LOG_FILE="${LOG_DIR}/reiter_cutandrun_${JOB_ID}.log"
+LOG_FILE="${LOG_DIR}/sub_chpskr_${JOB_ID}.log"
 
 # Redirect both stdout and stderr to the log file
 exec > "$LOG_FILE" 2>&1
@@ -32,20 +32,20 @@ echo >&2 "Base directory: ${tmp}"
 echo >&2 "LOG Directory: ${LOG_FILE}"
 echo >&2 "Script directory: ${PROJECT_ROOT}"
 echo >&2 "Submitting modules"
-echo >&2 "Conda environment being sourced: ${CONDA_ENV}"
 
 ################# CHIPSEEKER  ############
 while IFS=, read project sample R1 R2 control;do
-	qsub -hold_jid blacklist_"$sample"_dedup -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/$sample/MACS2_dedup/"$sample"_dedup_peaks_blklist.bed
-        qsub -hold_jid blacklist_"$sample"_dupmark -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/$sample/MACS2_dupmark/"$sample"_dupmark_peaks_blklist.bed
+	qsub -hold_jid blacklist_"$sample"_dedup -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/$sample/dedup/MACS2_dedup/"$sample"_dedup_peaks_blklist.bed $PROJECT_ROOT $LOG_DIR
+        qsub -hold_jid blacklist_"$sample"_dupmark -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/$sample/dupmark/MACS2_dupmark/"$sample"_dupmark_peaks_blklist.bed $PROJECT_ROOT $LOG_DIR
 
         if [ "$control" != "none" ]; then
-        qsub -hold_jid blacklist_"$sample"_vs_"$control"_dedup -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/"$sample"_vs_"$control"/MACS2_dedup/"$sample"_vs_"$control"_dedup_peaks_blklist.bed
-        qsub -hold_jid blacklist_"$sample"_vs_"$control"_dupmark -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/"$sample"_vs_"$control"/MACS2_dupmark/"$sample"_vs_"$control"_dupmark_peaks_blklist.bed
+        qsub -hold_jid blacklist_"$sample"_vs_"$control"_dedup -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/"$sample"_vs_"$control"/MACS2_dedup/"$sample"_vs_"$control"_dedup_peaks_blklist.bed $PROJECT_ROOT $LOG_DIR
+        qsub -hold_jid blacklist_"$sample"_vs_"$control"_dupmark -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/"$sample"_vs_"$control"/MACS2_dupmark/"$sample"_vs_"$control"_dupmark_peaks_blklist.bed $PROJECT_ROOT $LOG_DIR
 
         else
                 >&2 echo "no control"   
         fi
 
 done < $file
+
 

@@ -20,9 +20,9 @@ PROJECT_ROOT="$SGE_O_WORKDIR"
 script_dir="${PROJECT_ROOT}/modules/"
 
 ## LOG directory
-LOG_DIR=$workdir/log_reiter_cutandrun
+LOG_DIR="${workdir}/log_${JOB_ID}_cutandrun"
 mkdir -p "$LOG_DIR"
-LOG_FILE="${LOG_DIR}/reiter_cutandrun_${JOB_ID}.log"
+LOG_FILE="${LOG_DIR}/sub_blklist_${JOB_ID}.log"
 
 # Redirect both stdout and stderr to the log file
 exec > "$LOG_FILE" 2>&1
@@ -32,15 +32,14 @@ echo >&2 "Base directory: ${tmp}"
 echo >&2 "LOG Directory: ${LOG_FILE}"
 echo >&2 "Script directory: ${PROJECT_ROOT}"
 echo >&2 "Submitting modules"
-echo >&2 "Conda environment being sourced: ${CONDA_ENV}"
 
 
 ################# BLACKLISTED REGIONS  ############
 
 while IFS=, read project sample R1 R2 control;do
 	>&2 echo "removing blacklist from '$sample' peaks"
-                peak1=$workdir/"$sample"/MACS2_dedup/"$sample"_dedup_peaks.narrowPeak
-                peak2=$workdir/"$sample"/MACS2_dupmark/"$sample"_dupmark_peaks.narrowPeak
+                peak1=$workdir/"$sample"/dedup/MACS2_dedup/"$sample"_dedup_peaks.narrowPeak
+                peak2=$workdir/"$sample"/dupmark/MACS2_dupmark/"$sample"_dupmark_peaks.narrowPeak
                 qsub -hold_jid macs2_"$project"_"$sample" -N blacklist_"$sample"_dedup $script_dir/blacklist.sh $peak1 $PROJECT_ROOT $LOG_DIR
                 qsub -hold_jid macs2_"$project"_"$sample" -N blacklist_"$sample"_dupmark $script_dir/blacklist.sh $peak2 $PROJECT_ROOT $LOG_DIR
         if [ "$control" != "none" ]; then

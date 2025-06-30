@@ -62,7 +62,7 @@ alignMerge <- function(alignResult, spikeAlign){
 dupSummary <- function(proj, sampleList){
 	dupResult = c()
 	for(hist in sampleList){
-        	dupRes = read.table(paste0(projPath, hist,"/dupmark/", hist, "_henikoff_dupmark_metrics.txt"), header = TRUE, fill = TRUE)
+        	dupRes = read.table(paste0(projPath, hist,"/logs/", hist, "_henikoff_dupmark_metrics.txt"), header = TRUE, fill = TRUE)
 
         	dupResult = data.frame(Sample = hist, 
                 	               Project=proj,

@@ -29,7 +29,7 @@ exec > "$LOG_FILE" 2>&1
 
 echo >&2 "Sample Information file: ${file}"
 echo >&2 "Base directory: ${workdir}"
-echo >&2 "LOG Directory: ${LOG_FILE}"
+echo >&2 "LOG Directory: ${LOG_DIR}"
 echo >&2 "Script directory: ${PROJECT_ROOT}"
 echo >&2 "Submitting modules"
 
@@ -70,11 +70,11 @@ while IFS=, read project sample R1 R2 control;do
 	#qsub -hold_jid trim_"$project"_"$sample" -N spikealign_"$project"_"$sample" $script_dir/align_yeast.sh $project $sample $tmp
 	
 	## E.coli spike-in from Epicypher
-	qsub -hold_jid trim_"$project"_"$sample" -N spikealign_"$project"_"$sample" $script_dir/align_ecoliMG1655.sh $project $sample $tmp
+	qsub -hold_jid trim_"$project"_"$sample" -N spikealign_"$project"_"$sample" $script_dir/align_ecoliMG1655.sh $project $sample $workdir $PROJECT_ROOT $LOG_DIR
 	
 	
-	qsub -hold_jid spikealign_"$project"_"$sample" -N spikein_"$project"_"$sample" $script_dir/getSpikeIn.sh $sample $project $tmp
- 	qsub -hold_jid spikein_"$project"_"$sample",align_"$project"_"$sample" -N calibrate_"$project"_"$sample" $script_dir/calibrate_bedgraph.sh $sample $project $tmp
+	qsub -hold_jid spikealign_"$project"_"$sample" -N spikein_"$project"_"$sample" $script_dir/getSpikeIn.sh $sample $project $workdir $PROJECT_ROOT $LOG_DIR
+ 	qsub -hold_jid spikein_"$project"_"$sample",align_"$project"_"$sample" -N calibrate_"$project"_"$sample" $script_dir/calibrate_bedgraph.sh $sample $project $workdir $PROJECT_ROOT $LOG_DIR
 done < $file
 
 
@@ -97,8 +97,8 @@ done < $file
 
 while IFS=, read project sample R1 R2 control;do
 	>&2 echo "removing blacklist from '$sample' peaks"
-                peak1=$workdir/"$sample"/MACS2_dedup/"$sample"_dedup_peaks.narrowPeak
-                peak2=$workdir/"$sample"/MACS2_dupmark/"$sample"_dupmark_peaks.narrowPeak
+                peak1=$workdir/"$sample"/dedup/MACS2_dedup/"$sample"_dedup_peaks.narrowPeak
+                peak2=$workdir/"$sample"/dupmark/MACS2_dupmark/"$sample"_dupmark_peaks.narrowPeak
                 qsub -hold_jid macs2_"$project"_"$sample" -N blacklist_"$sample"_dedup $script_dir/blacklist.sh $peak1 $PROJECT_ROOT $LOG_DIR
                 qsub -hold_jid macs2_"$project"_"$sample" -N blacklist_"$sample"_dupmark $script_dir/blacklist.sh $peak2 $PROJECT_ROOT $LOG_DIR
         if [ "$control" != "none" ]; then
@@ -114,12 +114,12 @@ done < $file
 
 ################# CHIPSEEKER  ############
 while IFS=, read project sample R1 R2 control;do
-	qsub -hold_jid blacklist_"$sample"_dedup -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/$sample/MACS2_dedup/"$sample"_dedup_peaks_blklist.bed
-        qsub -hold_jid blacklist_"$sample"_dupmark -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/$sample/MACS2_dupmark/"$sample"_dupmark_peaks_blklist.bed
+	qsub -hold_jid blacklist_"$sample"_dedup -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/$sample/dedup/MACS2_dedup/"$sample"_dedup_peaks_blklist.bed $PROJECT_ROOT $LOG_DIR
+        qsub -hold_jid blacklist_"$sample"_dupmark -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/$sample/dupmark/MACS2_dupmark/"$sample"_dupmark_peaks_blklist.bed $PROJECT_ROOT $LOG_DIR
 
         if [ "$control" != "none" ]; then
-        qsub -hold_jid blacklist_"$sample"_vs_"$control"_dedup -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/"$sample"_vs_"$control"/MACS2_dedup/"$sample"_vs_"$control"_dedup_peaks_blklist.bed
-        qsub -hold_jid blacklist_"$sample"_vs_"$control"_dupmark -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/"$sample"_vs_"$control"/MACS2_dupmark/"$sample"_vs_"$control"_dupmark_peaks_blklist.bed
+        qsub -hold_jid blacklist_"$sample"_vs_"$control"_dedup -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/"$sample"_vs_"$control"/MACS2_dedup/"$sample"_vs_"$control"_dedup_peaks_blklist.bed $PROJECT_ROOT $LOG_DIR
+        qsub -hold_jid blacklist_"$sample"_vs_"$control"_dupmark -N chpsk_"$sample" $script_dir/chpskr_general.sh $workdir/"$sample"_vs_"$control"/MACS2_dupmark/"$sample"_vs_"$control"_dupmark_peaks_blklist.bed $PROJECT_ROOT $LOG_DIR
 
         else
                 >&2 echo "no control"   
@@ -136,21 +136,21 @@ genome=$PROJECT_ROOT/tools/homer/data/genomes/mm10/
 
 while IFS=, read project sample R1 R2 control;do
         
-	inputbed="${workdir}/${sample}/MACS2_dedup/${sample}_dedup_peaks_blklist.bed"
-	qsub -hold_jid blacklist_"$sample"_dedup -N homer_"$project"_"$sample" $script_dir/homer.sh $inputbed $genome 50 $LOG_DIR
+	inputbed="${workdir}/${sample}/dedup/MACS2_dedup/${sample}_dedup_peaks_blklist.bed"
+	qsub -hold_jid blacklist_"$sample"_dedup -N homer_"$project"_"$sample" $script_dir/homer.sh $inputbed $genome 50 $PROJECT_ROOT $LOG_DIR
 
-	inputbed2="${workdir}/${sample}/MACS2_dupmark/${sample}_dupmark_peaks_blklist.bed"
-	qsub -hold_jid blacklist_"$sample"_dupmark -N homer_dups_"$project"_"$sample" $script_dir/homer.sh $inputbed2 $genome 50 $LOG_DIR
+	inputbed2="${workdir}/${sample}/dupmark/MACS2_dupmark/${sample}_dupmark_peaks_blklist.bed"
+	qsub -hold_jid blacklist_"$sample"_dupmark -N homer_dups_"$project"_"$sample" $script_dir/homer.sh $inputbed2 $genome 50 $PROJET_ROOT $LOG_DIR
 	
 	if [ "$control" != "none" ]; then
 
         	>&2 echo "running '$sample'_vs_'$control' analysis"
                
                 inputbed3="${workdir}/${sample}_vs_${control}/MACS2_dedup/${sample}_vs_${control}_dedup_peaks_blklist.bed"
-                qsub -hold_jid blacklist_"$sample"_vs_"$control"_dedup -N homer_control_dedup_"$project"_"$sample" $script_dir/homer.sh $inputbed3 $genome 50 $LOG_DIR
+                qsub -hold_jid blacklist_"$sample"_vs_"$control"_dedup -N homer_control_dedup_"$project"_"$sample" $script_dir/homer.sh $inputbed3 $genome 50 $PROJECT_ROOT $LOG_DIR
 
 		inputbed4="${workdir}/${sample}_vs_${control}/MACS2_dupmark/${sample}_vs_${control}_dupmark_peaks_blklist.bed"
-		qsub -hold_jid blacklist_"$sample"_vs_"$control"_dupmark -N homer_control_dupmark_"$project"_"$sample" $script_dir/homer.sh $inputbed4 $genome 50 $LOG_DIR
+		qsub -hold_jid blacklist_"$sample"_vs_"$control"_dupmark -N homer_control_dupmark_"$project"_"$sample" $script_dir/homer.sh $inputbed4 $genome 50 $PROJECT_ROOT $LOG_DIR
         else
 		>&2 echo "no control run"
 
@@ -160,5 +160,4 @@ done < $file
 
 ################ GET METRICS AND COPY RESULTS ##################
 qsub -hold_jid "calibrate*" -N metrics $script_dir/sub_metrics.sh $file $workdir
-#qsub -hold_jid "seacr*","chpskr*" $script_dir/copy.sh $project $tmp
 

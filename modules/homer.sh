@@ -22,6 +22,7 @@ DIRECTORY="${INPUTBED%/*}"
 INPUTBEDFILE="${INPUTBED##*/}"
 GENOME_LOC=$2
 SIZE=$3
+PROJECT_ROOT=$4
 LOG_DIR=$5
 
 ######## SET UP LOG FILE #########
@@ -29,7 +30,9 @@ LOG_DIR=$5
 LOG_FILE="${LOG_DIR}/homer_${JOB_ID}.log"
 exec > "$LOG_FILE" 2>&1
 
+######## PARAMETERS #####
+SCRIPT_DIR="${PROJECT_ROOT}/tools/homer/bin"
 echo >&2 $GENOME_LOC
 echo >&2 $DIRECTORY
 
-findMotifsGenome.pl $INPUTBED $GENOME_LOC "$DIRECTORY"/"${INPUTBEDFILE%.*}"_"$SIZE"bp -size $SIZE -p "${NSLOTS:-1}"
+"${SCRIPT_DIR}/findMotifsGenome.pl" $INPUTBED $GENOME_LOC "$DIRECTORY"/"${INPUTBEDFILE%.*}"_"$SIZE"bp -size $SIZE -p "${NSLOTS:-1}"

@@ -20,9 +20,9 @@ PROJECT_ROOT="$SGE_O_WORKDIR"
 script_dir="${PROJECT_ROOT}/modules/"
 
 ## LOG directory
-LOG_DIR=$workdir/log_reiter_cutandrun
+LOG_DIR="${workdir}/log_${JOB_ID}_cutandrun"
 mkdir -p "$LOG_DIR"
-LOG_FILE="${LOG_DIR}/reiter_cutandrun_${JOB_ID}.log"
+LOG_FILE="${LOG_DIR}/sub_homer_${JOB_ID}.log"
 
 # Redirect both stdout and stderr to the log file
 exec > "$LOG_FILE" 2>&1
@@ -32,7 +32,6 @@ echo >&2 "Base directory: ${tmp}"
 echo >&2 "LOG Directory: ${LOG_FILE}"
 echo >&2 "Script directory: ${PROJECT_ROOT}"
 echo >&2 "Submitting modules"
-echo >&2 "Conda environment being sourced: ${CONDA_ENV}"
 
 ############### HOMER MOTIF FINDING #################
 
@@ -40,21 +39,21 @@ genome=$PROJECT_ROOT/tools/homer/data/genomes/mm10/
 
 while IFS=, read project sample R1 R2 control;do
         
-	inputbed="${workdir}/${sample}/MACS2_dedup/${sample}_dedup_peaks_blklist.bed"
-	qsub -hold_jid blacklist_"$sample"_dedup -N homer_"$project"_"$sample" $script_dir/homer.sh $inputbed $genome 50 $LOG_DIR
+	inputbed="${workdir}/${sample}/dedup/MACS2_dedup/${sample}_dedup_peaks_blklist.bed"
+	qsub -hold_jid blacklist_"$sample"_dedup -N homer_"$project"_"$sample" $script_dir/homer.sh $inputbed $genome 50 $PROJECT_ROOT $LOG_DIR
 
-	inputbed2="${workdir}/${sample}/MACS2_dupmark/${sample}_dupmark_peaks_blklist.bed"
-	qsub -hold_jid blacklist_"$sample"_dupmark -N homer_dups_"$project"_"$sample" $script_dir/homer.sh $inputbed2 $genome 50 $LOG_DIR
+	inputbed2="${workdir}/${sample}/dupmark/MACS2_dupmark/${sample}_dupmark_peaks_blklist.bed"
+	qsub -hold_jid blacklist_"$sample"_dupmark -N homer_dups_"$project"_"$sample" $script_dir/homer.sh $inputbed2 $genome 50 $PROJECT_ROOT $LOG_DIR
 	
 	if [ "$control" != "none" ]; then
 
         	>&2 echo "running '$sample'_vs_'$control' analysis"
                
                 inputbed3="${workdir}/${sample}_vs_${control}/MACS2_dedup/${sample}_vs_${control}_dedup_peaks_blklist.bed"
-                qsub -hold_jid blacklist_"$sample"_vs_"$control"_dedup -N homer_control_dedup_"$project"_"$sample" $script_dir/homer.sh $inputbed3 $genome 50 $LOG_DIR
+                qsub -hold_jid blacklist_"$sample"_vs_"$control"_dedup -N homer_control_dedup_"$project"_"$sample" $script_dir/homer.sh $inputbed3 $genome 50 $PROJECT_ROOT $LOG_DIR
 
 		inputbed4="${workdir}/${sample}_vs_${control}/MACS2_dupmark/${sample}_vs_${control}_dupmark_peaks_blklist.bed"
-		qsub -hold_jid blacklist_"$sample"_vs_"$control"_dupmark -N homer_control_dupmark_"$project"_"$sample" $script_dir/homer.sh $inputbed4 $genome 50 $LOG_DIR
+		qsub -hold_jid blacklist_"$sample"_vs_"$control"_dupmark -N homer_control_dupmark_"$project"_"$sample" $script_dir/homer.sh $inputbed4 $genome 50 $PROJECT_ROOT $LOG_DIR
         else
 		>&2 echo "no control run"
 

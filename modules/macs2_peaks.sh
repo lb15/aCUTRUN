@@ -8,12 +8,10 @@
 #$ -l mem_free=50G
 #$ -l scratch=10G
 #$ -l h_rt=96:00:00
-#$ -m ea                           #--email when done
-#$ -M Lauren.Byrnes@ucsf.edu        #--email
 
 ############## LOAD ENVIRONMENT #############
-
-source /wynton/home/reiter/lb13/miniconda3/bin/activate CutRun
+module load CBI miniforge3
+conda activate CUTRUN
 
 ############## DEFINE ARGUMENTS ############
 proj=$1
@@ -36,7 +34,7 @@ dedupmacsdir=$dedupdir/MACS2_dedup
 mkdir $dupmacsdir
 mkdir $dedupmacsdir
 
-crtools=$PROJECT_ROOT/tools/cutruntools/
+crtools="${PROJECT_ROOT}/tools/cutruntools/"
 
 ######## SET UP LOG FILE #########
 # Redirect both stdout and stderr to the log file
@@ -76,6 +74,9 @@ else
 	mkdir -p $macsdedupdir
 
 	controldir=$projdir/$control
+	vslogdir="${projdir}/${sample}_vs_${control}/logs"
+
+	mkdir $vslogdir
 
 	## keep dups
 	macs2 callpeak -t "${dupmarkdir}/${sample}_henikoff_dupmark_120bp.bam" \
@@ -86,7 +87,7 @@ else
 		--outdir $macsdupdir \
 		-q 0.01 \
 		-B --SPMR \
-		--keep-dup all 2> "${logdir}/${sample}_vs_${control}_dupmark_120bp.macs2.txt"
+		--keep-dup all 2> "${vslogdir}/${sample}_vs_${control}_dupmark_120bp.macs2.txt"
 
 	## no dups
 	macs2 callpeak -t "${dupmarkdir}/${sample}_henikoff_dupmark_120bp.bam" \
@@ -96,7 +97,7 @@ else
 		-n "$sample"_vs_"$control"_dedup \
 		--outdir $macsdedupdir \
 		-q 0.01 \
-		-B --SPMR 2> "${logdir}/${sample}_vs_${control}_dedup_120bp.macs2.txt"
+		-B --SPMR 2> "${vslogdir}/${sample}_vs_${control}_dedup_120bp.macs2.txt"
 
 fi
 

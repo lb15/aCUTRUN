@@ -22,29 +22,17 @@ script_dir="${PROJECT_ROOT}/modules/"
 ## LOG directory
 LOG_DIR="${workdir}/log_${JOB_ID}_cutandrun"
 mkdir -p "$LOG_DIR"
-LOG_FILE="${LOG_DIR}/sub_macs2_${JOB_ID}.log"
+LOG_FILE="${LOG_DIR}/sub_cutandrun_${JOB_ID}.log"
 
 # Redirect both stdout and stderr to the log file
 exec > "$LOG_FILE" 2>&1
 
 echo >&2 "Sample Information file: ${file}"
 echo >&2 "Base directory: ${workdir}"
-echo >&2 "LOG Directory: ${LOG_FILE}"
+echo >&2 "LOG Directory: ${LOG_DIR}"
 echo >&2 "Script directory: ${PROJECT_ROOT}"
 echo >&2 "Submitting modules"
 
-################## PEAK CALLING #######################
-
-while IFS=, read project sample R1 R2 control;do
-	
-	if [ "$control" != "none" ]; then
-		>&2 echo "Running peaking calling with control samples"
-		qsub -hold_jid "align_*" -N macs2_"$project"_"$sample" $script_dir/macs2_peaks.sh $project $sample $workdir $PROJECT_ROOT $LOG_DIR $control
-		
-		
-	else
-		>&2 echo "Running peak calling without control samples"
-		qsub -hold_jid align_"$project"_"$sample" -N macs2_"$project"_"$sample" $script_dir/macs2_peaks.sh $project $sample $workdir $PROJECT_ROOT $LOG_DIR
-	fi
-done < $file
+################ GET METRICS AND COPY RESULTS ##################
+qsub -hold_jid "calibrate*" -N metrics $script_dir/sub_metrics.sh $file $workdir $PROJECT_ROOT $LOG_DIR
 

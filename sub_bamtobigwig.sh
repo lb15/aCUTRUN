@@ -20,9 +20,9 @@ PROJECT_ROOT="$SGE_O_WORKDIR"
 script_dir="${PROJECT_ROOT}/modules/"
 
 ## LOG directory
-LOG_DIR=$workdir/log_reiter_cutandrun
+LOG_DIR="${workdir}/log_${JOB_ID}_cutandrun"
 mkdir -p "$LOG_DIR"
-LOG_FILE="${LOG_DIR}/reiter_cutandrun_${JOB_ID}.log"
+LOG_FILE="${LOG_DIR}/sub_bamtobigwig_${JOB_ID}.log"
 
 # Redirect both stdout and stderr to the log file
 exec > "$LOG_FILE" 2>&1
@@ -32,7 +32,6 @@ echo >&2 "Base directory: ${tmp}"
 echo >&2 "LOG Directory: ${LOG_FILE}"
 echo >&2 "Script directory: ${PROJECT_ROOT}"
 echo >&2 "Submitting modules"
-echo >&2 "Conda environment being sourced: ${CONDA_ENV}"
 
 ################ BAMTOBIGWIG #################
 while IFS=, read project sample R1 R2 control;do

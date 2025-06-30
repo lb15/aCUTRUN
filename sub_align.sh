@@ -29,7 +29,7 @@ exec > "$LOG_FILE" 2>&1
 
 echo >&2 "Sample Information file: ${file}"
 echo >&2 "Base directory: ${workdir}"
-echo >&2 "LOG Directory: ${LOG_FILE}"
+echo >&2 "LOG Directory: ${LOG_DIR}"
 echo >&2 "Script directory: ${PROJECT_ROOT}"
 echo >&2 "Submitting modules"
 

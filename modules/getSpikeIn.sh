@@ -7,33 +7,24 @@
 #$ -j y                            #-- tell the system that the STDERR and STDOUT should be joined
 #$ -l mem_free=10G
 #$ -l scratch=10G
-#$ -l h_rt=24:00:00
+#$ -l h_rt=72:00:00
 
+######## LOAD ENVIRONMENT/MODULES #####
+module load CBI r/4.4
 
-########### LOAD ENVIRONMENT/MODULES ###########
-
-module load CBI bedtools2/2.30.0
-
-########### DEFINE ARGUMENTS ##############
-peaks1=$1
-PROJECT_ROOT=$2
-LOG_DIR=$3
+####### DEFINE ARGUMENTS ####
+sample=$1
+project=$2
+projdir=$3
+PROJECT_ROOT=$4
+LOG_DIR=$5
 
 ######## SET UP LOG FILE #########
 # Redirect both stdout and stderr to the log file
-LOG_FILE="${LOG_DIR}/blacklist_${JOB_ID}.log"
+LOG_FILE="${LOG_DIR}/getSpike_${JOB_ID}.log"
 exec > "$LOG_FILE" 2>&1
 
-####### BLACKLISTED SITES FROM ENCODE ######
-blacklist=$PROJECT_ROOT/resources/mm10_blacklist_ENCFF547MET.bed
+script_dir="${PROJECT_ROOT}/modules/get_spikein.R"
 
-peaks1_dir=${peaks1%/*}
-peaks1_base=${peaks1##*/}
-
-####### RUN BEDTOOLS INTERSECT ######
-bedtools intersect \
-	-a $peaks1 \
-	-b $blacklist \
-	-v > $peaks1_dir/"${peaks1_base%.*}"_blklist.bed
-
+Rscript $script_dir $project $sample $projdir
 

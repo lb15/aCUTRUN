@@ -8,13 +8,12 @@
 #$ -l mem_free=20G
 #$ -l scratch=500G
 #$ -l h_rt=96:00:00
-#$ -m ea                           #--email when done
 #$ -pe smp 4
 
 ######### LOAD ENVIRONMENT AND MODULES #########
-source /wynton/home/reiter/lb13/miniconda3/bin/activate CutRun
 
-module load CBI bowtie2/2.4.2 samtools/1.10 picard/2.24.0
+module load CBI bowtie2/2.4.2 samtools/1.10 picard/2.27.5 miniforge3
+conda activate CUTRUN
 
 ######### DEFINE ARGUMENTS ########
 
@@ -41,9 +40,9 @@ aligndir=$workdir/alignment
 dupmarkdir=$workdir/dupmark
 dedupdir=$workdir/dedup
 
-mkdir $aligndir
-mkdir $dupmarkdir
-mkdir $dedupdir
+mkdir -p $aligndir
+mkdir -p $dupmarkdir
+mkdir -p $dedupdir
 
 ## Project directory
 trimdir=$projdir/$sample/trimmomatic
@@ -71,11 +70,23 @@ echo >&2 "Starting bowtie alignment using Henikoff Lab parameters"
 #rm $aligndir/"$sample"_aligned_crtools.sam
 
 ## alignment parameters from Henikoff lab
-bowtie2 -p "${NSLOTS:-1}" --local --very-sensitive-local --no-unal --no-mixed --no-discordant --phred33 -I 10 -X 700 -x $bt2idx/mm10 -1 $trimdir/"$sample"_1_kseq_paired.fastq.gz -2 $trimdir/"$sample"_2_kseq_paired.fastq.gz -S $aligndir/"$sample"_aligned_henikoff.sam 2> $logdir/"$sample"_bowtie2_stats_henikoff.txt
+bowtie2 -p "${NSLOTS:-1}" \
+	--local \
+	--very-sensitive-local \
+	--no-unal \
+	--no-mixed \
+	--no-discordant \
+	--phred33 \
+	-I 10 -X 700 \
+	-x $bt2idx/mm10 \
+	-1 "${trimdir}/${sample}_1_kseq_paired.fastq.gz" \
+	-2 "${trimdir}/${sample}_2_kseq_paired.fastq.gz" \
+	-S "${aligndir}/${sample}_aligned_henikoff.sam" 2> "${logdir}/${sample}_bowtie2_stats_henikoff.txt"
 
 echo >&2 "Filtering multimappers by minimum Quality score of 2"
 minQualityScore=2
-samtools view -q $minQualityScore -bS $aligndir/"$sample"_aligned_henikoff.sam > $aligndir/"$sample"_aligned_henikoff.bam
+samtools view -q $minQualityScore \
+	-bS "${aligndir}/${sample}_aligned_henikoff.sam" > "${aligndir}/${sample}_aligned_henikoff.bam"
 
 >&2 echo "Filtering and alignment complete"
 >&2 echo "Starting sorting and marking duplicates"
@@ -86,12 +97,14 @@ java -Xmx8g -Djava.io.tmpdir=$aligndir/ -jar $PICARD_HOME/picard.jar SortSam \
 	SORT_ORDER=coordinate \
 	TMP_DIR=$TMPDIR
 
-picard MarkDuplicates \
+samtools view -H "${aligndir}/${sample}_aligned_henikoff_sort.bam" | grep '@RG' 
+
+PicardCommandLine MarkDuplicates \
 INPUT="${aligndir}/${sample}_aligned_henikoff_sort.bam" \
 OUTPUT="${dupmarkdir}/${sample}_henikoff_dupmark.bam" \
 METRICS_FILE="${logdir}/${sample}_henikoff_dupmark_metrics.txt"
 
-picard MarkDuplicates \
+PicardCommandLine MarkDuplicates \
 INPUT="${aligndir}/${sample}_aligned_henikoff_sort.bam" \
 OUTPUT="${dedupdir}/${sample}_henikoff_dedup.bam" \
 METRICS_FILE="${logdir}/${sample}_henikoff_dedup_metrics.txt" \

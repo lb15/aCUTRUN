@@ -22,29 +22,31 @@ script_dir="${PROJECT_ROOT}/modules/"
 ## LOG directory
 LOG_DIR="${workdir}/log_${JOB_ID}_cutandrun"
 mkdir -p "$LOG_DIR"
-LOG_FILE="${LOG_DIR}/sub_macs2_${JOB_ID}.log"
+LOG_FILE="${LOG_DIR}/sub_spikein_${JOB_ID}.log"
 
 # Redirect both stdout and stderr to the log file
 exec > "$LOG_FILE" 2>&1
 
 echo >&2 "Sample Information file: ${file}"
 echo >&2 "Base directory: ${workdir}"
-echo >&2 "LOG Directory: ${LOG_FILE}"
+echo >&2 "LOG Directory: ${LOG_DIR}"
 echo >&2 "Script directory: ${PROJECT_ROOT}"
 echo >&2 "Submitting modules"
 
-################## PEAK CALLING #######################
 
+################### Spike-in ALIGNMENT ##################
 while IFS=, read project sample R1 R2 control;do
+	## E.coli from homemade pA-MNase
+	#qsub -hold_jid trim_"$project"_"$sample" -N spikealign_"$project"_"$sample" $script_dir/align_ecoli2.sh $project $sample $tmp
 	
-	if [ "$control" != "none" ]; then
-		>&2 echo "Running peaking calling with control samples"
-		qsub -hold_jid "align_*" -N macs2_"$project"_"$sample" $script_dir/macs2_peaks.sh $project $sample $workdir $PROJECT_ROOT $LOG_DIR $control
-		
-		
-	else
-		>&2 echo "Running peak calling without control samples"
-		qsub -hold_jid align_"$project"_"$sample" -N macs2_"$project"_"$sample" $script_dir/macs2_peaks.sh $project $sample $workdir $PROJECT_ROOT $LOG_DIR
-	fi
+	## Yeast spike-in from Henikoff lab
+	#qsub -hold_jid trim_"$project"_"$sample" -N spikealign_"$project"_"$sample" $script_dir/align_yeast.sh $project $sample $tmp
+	
+	## E.coli spike-in from Epicypher
+	qsub -hold_jid trim_"$project"_"$sample" -N spikealign_"$project"_"$sample" $script_dir/align_ecoliMG1655.sh $project $sample $workdir $PROJECT_ROOT $LOG_DIR
+	
+	
+	qsub -hold_jid spikealign_"$project"_"$sample" -N spikein_"$project"_"$sample" $script_dir/getSpikeIn.sh $sample $project $workdir $PROJECT_ROOT $LOG_DIR
+ 	qsub -hold_jid spikein_"$project"_"$sample",align_"$project"_"$sample" -N calibrate_"$project"_"$sample" $script_dir/calibrate_bedgraph.sh $sample $project $workdir $PROJECT_ROOT $LOG_DIR
 done < $file
 
