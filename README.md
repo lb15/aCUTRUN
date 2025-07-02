@@ -9,13 +9,13 @@ Kseq\
 HOMER\
 ChIPseeker (R package) install for r/4.4\
 TxDb.Mmusculus.UCSC.mm10.knownGene (R package) install for r/4.4\
-org.Mm.eg.db (R package) install for r/4.4\
+org.Mm.eg.db (R package) install for r/4.4
 
 mm10 bowtie2 index (place in a folder called "mm10" in the resources folder: aCUTRUN/resources/mm10)\
 mm10 gtf (place in the resources folder: aCUTRUN/resources)\
-E.coli genome for spike-in (Epicypher spike-in)\
+E.coli genome for spike-in (Epicypher spike-in)
 
-## Individual Analysis
+# Individual Analysis
 Requirements:
 1) paired-end FASTQs in a project folder where the output from the pipeline will be directed
 2) a samplesheet for the project in the same folder as the FASTQs
@@ -29,24 +29,24 @@ Project Folder: The folder where you are storing the FASTQs and where the analys
 Sample Name: The name of your sample, which is also the prefix on the FASTQ file\
 Suffix of FASTQ1/2: The rest of the FASTQ filename after the sample name, usually indicating read, lane, etc.\
 Control sample name: The control sample you would like to compare your sample to (i.e the IgG control in CUT&RUN experiments). If "none", sample vs control analysis will not be performed.\
-Two example files are provided for two projects with two samples each:
-Project 1: CR48_test -  ```CR48_test_samples.txt``` in ```aCUTRUN/example_sheets/```
+Two example files are provided for two projects with two samples each:\
+Project 1: CR48_test -  ```CR48_test_samples.txt``` in ```aCUTRUN/example_sheets/```\
 Project 2: CR49_test - ```CR49_test_samples.txt``` in ```aCUTRUN/example_sheets/```
 
 In preparation for replicate analysis, the Sample Name should include the project ID.\
 For example: Project ID: CR48_test, Sample Name: CR48_test_Gli2_500.\
 The replicates should also have matching sample names.\
-For example: Replicate 1 Sample Name: CR48_test_Gli2_500, Replicate 2 Sample Name: CR49_test_Gli2_500.\
+For example: Replicate 1 Sample Name: CR48_test_Gli2_500, Replicate 2 Sample Name: CR49_test_Gli2_500.
 
-# Individual analysis submission
-Arguments: Full path to the sample.txt file
+## Individual analysis submission
+Arguments: Full path to the samples.txt file
 
 ```
 cd /path/to/aCUTRUN
-qsub submit_cutandrun.sh /path/to/CR48_test_sample.txt
+qsub submit_cutandrun.sh /path/to/CR48_test_samples.txt
  ```
 
-## Replicate Analysis
+# Replicate Analysis
 Requirements:
 1) Individual analysis has been run on all samples
 2) Project folders for each replicate are in the same base folder. For example: ```/path/to/base/CR48_test``` and ```/path/to/base/CR49_test```
@@ -64,14 +64,14 @@ Control Sample Name: The name of the control sample that the Sample Name was com
 Project ID replicate 1: Project ID for first project\
 Project ID replicate 2: Project ID for second project\
 ...\
-Project ID replicate n: Project ID for nth project\
+Project ID replicate n: Project ID for nth project
 
-An example file is provided for two projects with two samples each:
+An example file is provided for two projects with two samples each:\
 ```aCUTRUN/example_sheets/CR48_49_test_replicates.csv```
 
-# Replicate analysis submission
+## Replicate analysis submission
 Arguments: Full path to the replicates.csv file\
-Full path to the folder containing the project folders for indvidiual projects.\
+Full path to the folder containing the project folders for indvidiual projects.
 ```
 cd /path/to/aCUTRUN
 qsub submit_replicates.sh /path/to/base/CR48_49_test/CR48_49_test_replicates.csv /path/to/base/
