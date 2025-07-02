@@ -20,7 +20,7 @@
 INPUTBED=$1
 DIRECTORY="${INPUTBED%/*}"
 INPUTBEDFILE="${INPUTBED##*/}"
-GENOME_LOC=$2
+GENOME=$2 #parameter not in use right now. hardcoded to mm10 below.
 SIZE=$3
 PROJECT_ROOT=$4
 LOG_DIR=$5
@@ -32,6 +32,8 @@ exec > "$LOG_FILE" 2>&1
 
 ######## PARAMETERS #####
 SCRIPT_DIR="${PROJECT_ROOT}/tools/homer/bin"
+GENOME_LOC="${PROJECT_ROOT}/tools/homer/data/genomes/mm10"
+
 echo >&2 $GENOME_LOC
 echo >&2 $DIRECTORY
 

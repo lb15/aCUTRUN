@@ -78,8 +78,8 @@ while IFS=, read -r first_arg rest_of_line; do
 
 
 	for ((i=2; i<${#args[@]}; i++)); do
-		dup_file=$workdir/${args[$i]}/"${args[$i]}"_"$sample"_vs_"${args[$i]}"_"$control"/dupmark/MACS2_dupmark/"${args[$i]}"_"$sample"_vs_"${args[$i]}"_"$control"_dupmark_peaks_blklist.bed
-		dedup_file=$workdir/${args[$i]}/"${args[$i]}"_"$sample"_vs_"${args[$i]}"_"$control"/dedup/MACS2_dedup/"${args[$i]}"_"$sample"_vs_"${args[$i]}"_"$control"_dedup_peaks_blklist.bed
+		dup_file=$workdir/${args[$i]}/"${args[$i]}"_"$sample"_vs_"${args[$i]}"_"$control"/MACS2_dupmark/"${args[$i]}"_"$sample"_vs_"${args[$i]}"_"$control"_dupmark_peaks_blklist.bed
+		dedup_file=$workdir/${args[$i]}/"${args[$i]}"_"$sample"_vs_"${args[$i]}"_"$control"/MACS2_dedup/"${args[$i]}"_"$sample"_vs_"${args[$i]}"_"$control"_dedup_peaks_blklist.bed
 
 		## append peak list from each replicate sample
 		echo $dup_file >> "${duplist}"
@@ -113,13 +113,13 @@ while IFS=, read -r name sample control rest_of_line; do
 
 
 	###### REMOVE PROBLEMATIC REGIONS ###############
-	qsub -N "problem_dup_hom_${name}_${sample}_${control}" \
+	qsub -N "problem_dup_${name}_${sample}_${control}" \
 		-hold_jid "${name}_${sample}_${control}_multiinter_dupmark" \
 		$script_dir/problemregions_subtract.sh "${outputfile_dup}_replicates_homID.bed" \
 		$PROJECT_ROOT \
 		$LOG_DIR
 
-	qsub -N "problem_dedup_hom_${name}_${sample}_${control}" \
+	qsub -N "problem_dedup_${name}_${sample}_${control}" \
 		-hold_jid "${name}_${sample}_${control}_multiinter_dedup" \
 		$script_dir/problemregions_subtract.sh "${outputfile_dedup}_replicates_homID.bed" \
 		$PROJECT_ROOT \
@@ -143,25 +143,25 @@ while IFS=, read -r name sample control rest_of_line; do
 		"${PROJECT_ROOT}" \
                 "${LOG_DIR}"
 
-	qsub -hold_jid "problem_dup_hom_${name}_${sample}_${control}" \
+	qsub -hold_jid "problem_dup_${name}_${sample}_${control}" \
 		"${PROJECT_ROOT}/modules/homer.sh" \
-		"${output_dup}" mm10 50 
+		"${output_dup}" mm10 50 \ 
 		"${PROJECT_ROOT}" \
 		"${LOG_DIR}"
 
-	qsub -hold_jid "problem_dup_hom_${name}_${sample}_${control}" \
+	qsub -hold_jid "problem_dup_${name}_${sample}_${control}" \
 		"${PROJECT_ROOT}/modules/homer_annotatepeaks.sh" \
 		"${output_dup}" mm10 homeranno \
 		"${PROJECT_ROOT}" \
 		"${LOG_DIR}"
 
-	qsub -hold_jid "problem_dedup_hom_${name}_${sample}_${control}" \
+	qsub -hold_jid "problem_dedup_${name}_${sample}_${control}" \
 		"${PROJECT_ROOT}/modules/homer.sh" \
 		"${output_dedup}" mm10 50 \
 		"${PROJECT_ROOT}" \
 		"${LOG_DIR}"
 	
-	qsub -hold_jid "problem_dedup_hom_${name}_${sample}_${control}" \
+	qsub -hold_jid "problem_dedup_${name}_${sample}_${control}" \
 		"${PROJECT_ROOT}/modules/homer_annotatepeaks.sh" \
 		"${output_dedup}" mm10 homeranno \
 		"${PROJECT_ROOT}" \
@@ -174,7 +174,7 @@ done < $file
 echo >&2 "Making consensus peak list for entire project"
 
 qsub -N "consensus_${name}" \
-	-hold_jid "*_multiinter_*" \
+	-hold_jid "problem_*" \
 	"${script_dir}/consensus_peaks_nogreylist.sh" $file $workdir $PROJECT_ROOT $LOG_DIR
 
 ##################### MAKE AVERAGE BIGWIGS #########################
@@ -188,10 +188,10 @@ while IFS=, read -r first_arg rest_of_line; do
         control=${args[1]}
         echo "Sample: $sample"
 
-	samdup="${outputdir}/${name}/${sample}/dupmark/"
-	samdedup="${outputdir}/${name}/${sample}/dedup/"
-	condup="${outputdir}/${name}/${control}/dupmark/"
-	condedup="${outputdir}/${name}/${control}/dedup/"
+	samdup="${outputdir}/${sample}/dupmark/"
+	samdedup="${outputdir}/${sample}/dedup/"
+	condup="${outputdir}/${control}/dupmark/"
+	condedup="${outputdir}/${control}/dedup/"
 	
 	mkdir -p $samdup
 	mkdir -p $samdedup
@@ -238,10 +238,10 @@ while IFS=, read -r first_arg rest_of_line; do
 done < $file
 
 while IFS=, read -r name sample control rest_of_line; do
-	dir_s_dup="${outputdir}/${name}/${sample}/dupmark/"
-	dir_s_dedup="${outputdir}/${name}/${sample}/dedup/"
-	dir_c_dup="${outputdir}/${name}/${control}/dupmark/"
-	dir_c_dedup="${outputdir}/${name}/${control}/dedup/"
+	dir_s_dup="${outputdir}/${sample}/dupmark/"
+	dir_s_dedup="${outputdir}/${sample}/dedup/"
+	dir_c_dup="${outputdir}/${control}/dupmark/"
+	dir_c_dedup="${outputdir}/${control}/dedup/"
 
 	qsub $script_dir/bigwigAverage_auto.sh \
 		"${dir_s_dup}/${sample}_dupmark_bigwig_list.txt" \

@@ -34,7 +34,7 @@ LOG_FILE="${LOG_DIR}/annohomer_${JOB_ID}.log"
 exec > "$LOG_FILE" 2>&1
 
 GENOME_LOC="${PROJECT_ROOT}/tools/homer/data/genomes/mm10"
-GTF="${RPOJECT_ROOT}/resources/mm10.refGene.gtf"
+GTF="${PROJECT_ROOT}/resources/mm10.refGene.gtf"
 
 echo >&2 "Genome: ${GENOME_LOC}"
 

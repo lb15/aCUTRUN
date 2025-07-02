@@ -45,9 +45,9 @@ fi
 #### concatenate peak files from all samples (vs. controls)
 
 while IFS=, read -r name sample control rest_of_line; do
-	peaks_dup="${dir}/${name}/${sample}_vs_${control}/${sample}_vs_${control}_dupmark_multiinter_replicates_noprob.bed"
-	peaks_dedup="${dir}/${name}/${sample}_vs_${control}/${sample}_vs_${control}_dedup_multiinter_replicates_noprob.bed"
-
+	peaks_dup="${dir}/${name}/${sample}_vs_${control}/dupmark/${sample}_vs_${control}_dupmark_multiinter_replicates_homID_noprob.bed"
+	peaks_dedup="${dir}/${name}/${sample}_vs_${control}/dedup/${sample}_vs_${control}_dedup_multiinter_replicates_homID_noprob.bed"
+	echo >&2 "Peaks to combine: ${peaks_dup}"
 
 	cat "${peaks_dup}" >> "${dir}/${name}/${name}_dupmark_consensus_peaks.bed" 
 	cat "${peaks_dedup}" >> "${dir}/${name}/${name}_dedup_consensus_peaks.bed" 
