@@ -1,0 +1,2 @@
+CR49_test,CR49_test_GFP_500,downsample_R1.fastq.gz,downsample_R2.fastq.gz,none
+CR49_test,CR49_test_Gli2_500,downsample_R1.fastq.gz,downsample_R2.fastq.gz,CR49_test_GFP_500

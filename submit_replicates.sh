@@ -145,7 +145,7 @@ while IFS=, read -r name sample control rest_of_line; do
 
 	qsub -hold_jid "problem_dup_${name}_${sample}_${control}" \
 		"${PROJECT_ROOT}/modules/homer.sh" \
-		"${output_dup}" mm10 50 \ 
+		"${output_dup}" mm10 50 \
 		"${PROJECT_ROOT}" \
 		"${LOG_DIR}"
 
