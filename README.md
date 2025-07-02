@@ -75,3 +75,6 @@ Full path to the folder containing the project folders for indvidiual projects.
 ```
 cd /path/to/aCUTRUN
 qsub submit_replicates.sh /path/to/base/CR48_49_test/CR48_49_test_replicates.csv /path/to/base/
+
+# Accessory scripts
+Example scripts for analyses such as Diffbind are included. They require information and design based on project goals. Scripts are provided as a guide.
